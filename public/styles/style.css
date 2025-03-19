@@ -1,0 +1,194 @@
+body {
+    background: linear-gradient(to right, #4facfe, #00f2fe); /* Blue gradient background */
+    color: #333; /* Text color for readability */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #005f99; /* Dark blue header */
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+
+.show-details {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-selection {
+    margin: 20px 0;
+}
+
+.ticket-selection label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+.ticket-selection select {
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button, .purchase-button {
+    background: #007bff; /* Blue button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}
+
+button:hover, .purchase-button:hover {
+    background: #0056b3; /* Darker blue on hover */
+}
+
+main {
+    padding: 20px;
+}
+
+section {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for sections */
+    margin: 20px 0;
+    padding: 20px;
+}
+
+#ticket-form label {
+    display: block;
+    margin: 10px 0;
+}
+
+#ticket-form input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+#registration-form, #ticket-form {
+    margin: 20px 0;
+}
+
+#registration-form label, #ticket-form label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+#registration-form input, #ticket-form input[type="text"], 
+#ticket-form input[type="password"], #ticket-form input[type="email"], 
+#ticket-form input[type="number"] {
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+#ticket-form input[type="radio"] {
+    margin-right: 10px;
+}
+
+#registration-form button, #ticket-form button {
+    background: #007bff; /* Blue button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}
+
+#registration-form button:hover, #ticket-form button:hover {
+    background: #0056b3; /* Darker blue on hover */
+}
+
+#verification-form {
+    margin: 20px 0;
+}
+
+#verification-form label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+#verification-form input {
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+#verification-form button {
+    background: #007bff; /* Blue button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}
+
+#verification-form button:hover {
+    background: #0056b3; /* Darker blue on hover */
+}
+
+#card-details, #transfer-details {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+#card-details label, #transfer-details p {
+    margin: 5px 0;
+    display: block;
+}
+
+#confirm-transfer {
+    background: #28a745; /* Green button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 10px;
+}
+
+#confirm-transfer:hover {
+    background: #218838; /* Darker green on hover */
+}
+
+#purchase-confirmation {
+    background: #e6ffe6; /* Light green background for success */
+    border: 1px solid #28a745; /* Green border */
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#purchase-confirmation h3 {
+    color: #28a745; /* Green text for success message */
+}

@@ -1,0 +1,188 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const path = require('path');
+const cors = require('cors'); // Ensure CORS is required only once
+require('dotenv').config(); // Load environment variables
+
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'src')));
+app.use(cors()); // Enable CORS for all routes
+
+let users = {}; // In-memory storage for simplicity
+
+// Registration endpoint
+app.post('/api/register', (req, res) => {
+    const { username, password, email } = req.body;
+
+    if (!username || !password || !email) {
+        return res.status(400).send('All fields are required.');
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).+$/; // At least one uppercase letter and one number
+    if (!passwordRegex.test(password)) {
+        return res.status(400).send('Password must include at least one uppercase letter and one number.');
+    }
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000); // Generate 6-digit code
+    users[username] = { password, email, verificationCode, verified: false };
+
+    // Send verification code via email
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER, // Use environment variable
+            pass: process.env.EMAIL_PASS, // Use environment variable
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your Verification Code',
+        text: `Your verification code is: ${verificationCode}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Error sending email:', error);
+            return res.status(500).send('Error sending verification code.');
+        }
+        console.log('Verification email sent:', info.response);
+        res.status(200).send('Registration successful. Check your email for the verification code.');
+    });
+});
+
+// Verification endpoint
+app.post('/api/verify', (req, res) => {
+    const { email, verificationCode } = req.body;
+
+    if (!email || !verificationCode) {
+        return res.status(400).send('All fields are required.');
+    }
+
+    const user = Object.values(users).find(user => user.email === email);
+    if (user && user.verificationCode === parseInt(verificationCode)) {
+        user.verified = true;
+        res.status(200).send('Verification successful.');
+    } else {
+        res.status(400).send('Invalid verification code.');
+    }
+});
+
+// Resend verification code endpoint
+app.post('/api/resend-code', (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: 'Email is required.' });
+    }
+
+    const user = Object.values(users).find(user => user.email === email);
+    if (!user) {
+        return res.status(400).json({ message: 'No user found with this email.' });
+    }
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your Verification Code',
+        text: `Your verification code is: ${user.verificationCode}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Error resending verification code:', error);
+            return res.status(500).json({ message: 'Error resending verification code.' });
+        }
+        console.log('Verification code resent:', info.response);
+        res.status(200).json({ message: 'Verification code resent successfully.' });
+    });
+});
+
+// Purchase endpoint
+app.post('/purchase', (req, res) => {
+    const { ticketQuantity, buyerName, buyerEmail, paymentMethod, cardNumber, cardExpiry, cardCvv } = req.body;
+
+    if (!ticketQuantity || !buyerName || !buyerEmail || !paymentMethod) {
+        return res.status(400).send('All fields are required.');
+    }
+
+    if (paymentMethod === 'card') {
+        if (!cardNumber || !cardExpiry || !cardCvv) {
+            return res.status(400).send('Card details are required for card payment.');
+        }
+
+        console.log('Card Payment Details:', { cardNumber, cardExpiry, cardCvv });
+        console.log('Purchase Details:', req.body);
+
+        sendReceiptEmail(buyerName, buyerEmail, ticketQuantity, paymentMethod, res);
+    } else if (paymentMethod === 'transfer') {
+        console.log('Bank Transfer Selected. Waiting for manual confirmation.');
+        console.log('Purchase Details:', req.body);
+
+        res.status(200).send('Bank transfer selected. Your payment will be confirmed manually.');
+    }
+});
+
+// Function to send receipt email
+function sendReceiptEmail(buyerName, buyerEmail, ticketQuantity, paymentMethod, res) {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: buyerEmail,
+        subject: 'Your Ticket Purchase Receipt',
+        text: `Hello ${buyerName},\n\nThank you for your purchase!\n\nHere are your ticket details:\n- Tickets Purchased: ${ticketQuantity}\n- Payment Method: ${paymentMethod}\n\nEnjoy the show!\n\nBest regards,\nTicket Booking Website`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Error sending receipt email:', error);
+            return res.status(500).send('Purchase successful, but failed to send receipt.');
+        }
+        console.log('Receipt email sent:', info.response);
+        res.status(200).json({
+            message: 'Purchase successful! Receipt sent to your email.',
+            ticketDetails: {
+                buyerName,
+                buyerEmail,
+                ticketQuantity,
+            },
+        });
+    });
+}
+
+// Confirm transfer endpoint
+app.post('/confirm-transfer', (req, res) => {
+    const { buyerName, buyerEmail } = req.body;
+
+    if (!buyerName || !buyerEmail) {
+        return res.status(400).send('Buyer details are required.');
+    }
+
+    console.log(`Transfer confirmation received from ${buyerName} (${buyerEmail}).`);
+    res.status(200).send('Transfer confirmed. Your payment has been verified.');
+});
+
+// Start the server
+app.listen(3000, () => {
+    console.log('Server running on http://localhost:3000');
+});

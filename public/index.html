@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Booking Website</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Ticket Booking Website</h1>
+    </header>
+    <main>
+        <section id="show-details">
+            <h2>Show Details</h2>
+            <p>Join us for an amazing show! Date: <strong> July 16, 2025</strong></p>
+            <p>Location: <strong>City Theater</strong></p>
+        </section>
+        <section id="registration">
+            <h2>Register</h2>
+            <form id="registration-form" action="/api/register" method="POST">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </form>
+            <form id="verification-form" action="/api/verify" method="POST">
+                <label for="verification-email">Enter Your Email:</label>
+                <input type="email" id="verification-email" name="verification-email" required>
+                <label for="verification-code">Enter Verification Code:</label>
+                <input type="text" id="verification-code" name="verification-code" required>
+                <button type="submit">Verify</button>
+                <button type="button" id="receive-code">Receive Code</button>
+            </form>
+        </section>
+        <section id="ticket-selection">
+            <h2>Select Tickets</h2>
+            <form id="ticket-form" action="/purchase" method="POST">
+                <label for="ticket-quantity">Number of Tickets:</label>
+                <input type="number" id="ticket-quantity" name="ticket-quantity" min="1" required>
+                
+                <label for="buyer-name">Your Name:</label>
+                <input type="text" id="buyer-name" name="buyer-name" required>
+                
+                <label for="buyer-email">Your Email:</label>
+                <input type="email" id="buyer-email" name="buyer-email" required>
+                
+                <label for="notifications">
+                    <input type="checkbox" id="notifications" name="notifications">
+                    Receive notifications about future events
+                </label>
+                
+                <h3>Payment Options</h3>
+                <label>
+                    <input type="radio" name="payment-method" value="card" required>
+                    Pay with Card
+                </label>
+                <div id="card-details" style="display: none;">
+                    <label for="card-number">Card Number:</label>
+                    <input type="text" id="card-number" name="card-number" placeholder="1234 5678 9012 3456">
+                    
+                    <label for="card-expiry">Expiry Date:</label>
+                    <input type="text" id="card-expiry" name="card-expiry" placeholder="MM/YY">
+                    
+                    <label for="card-cvv">CVV:</label>
+                    <input type="text" id="card-cvv" name="card-cvv" placeholder="123">
+                </div>
+                <label>
+                    <input type="radio" name="payment-method" value="transfer" required>
+                    Pay with Bank Transfer
+                </label>
+                <div id="transfer-details" style="display: none;">
+                    <p>Bank Name: <strong>Opay</strong></p>
+                    <p>Account Name: <strong>Manu Felicia</strong></p>
+                    <p>Account Number: <strong>7043438748</strong></p>
+                    <p>IFSC Code: <strong>MYBANK001</strong></p>
+                    <p><em>Note: Your payment will be confirmed manually after the transfer is received.</em></p>
+                    <button type="button" id="confirm-transfer">I have sent the money</button>
+                </div>
+                
+                <button type="submit">Purchase</button>
+            </form>
+            <div id="purchase-confirmation" style="display: none; margin-top: 20px;">
+                <h3>Purchase Successful!</h3>
+                <p>Your tickets have been purchased successfully. See the details below:</p>
+                <div id="ticket-details"></div>
+            </div>
+        </section>
+    </main>
+    <script>
+        document.getElementById('registration-form').addEventListener('submit', function (e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const passwordRegex = /^(?=.*[A-Z])(?=.*\d).+$/; // At least one uppercase letter and one number
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return;
+            }
+
+            if (!passwordRegex.test(password)) {
+                e.preventDefault();
+                alert('Password must include at least one uppercase letter and one number.');
+            }
+        });
+
+        document.getElementById('receive-code').addEventListener('click', function () {
+            const email = document.getElementById('verification-email').value;
+            if (!email) {
+                alert('Please enter your email to receive the verification code.');
+                return;
+            }
+
+            fetch('http://localhost:3000/api/resend-code', { // Use full URL
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => { throw new Error(data.message); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message || 'Verification code sent successfully.');
+                })
+                .catch(error => {
+                    console.error('Error:', error); // Log error to console
+                    alert(`Error: ${error.message}`);
+                });
+        });
+
+        document.getElementById('ticket-form').addEventListener('submit', function (e) {
+            const verificationCode = document.getElementById('verification-code').value;
+            if (!verificationCode) {
+                e.preventDefault();
+                alert('You must verify your account before purchasing tickets.');
+                return;
+            }
+
+            e.preventDefault(); // Prevent form submission for demonstration
+            const ticketQuantity = document.getElementById('ticket-quantity').value;
+            const buyerName = document.getElementById('buyer-name').value;
+            const buyerEmail = document.getElementById('buyer-email').value;
+
+            if (ticketQuantity <= 0) {
+                alert('Please select at least one ticket.');
+                return;
+            }
+
+            // Simulate a successful purchase
+            document.getElementById('purchase-confirmation').style.display = 'block';
+            document.getElementById('ticket-details').innerHTML = `
+                <p><strong>Name:</strong> ${buyerName}</p>
+                <p><strong>Email:</strong> ${buyerEmail}</p>
+                <p><strong>Tickets Purchased:</strong> ${ticketQuantity}</p>
+            `;
+        });
+
+        const paymentMethodInputs = document.querySelectorAll('input[name="payment-method"]');
+        const cardDetails = document.getElementById('card-details');
+        const transferDetails = document.getElementById('transfer-details');
+        const confirmTransferButton = document.getElementById('confirm-transfer');
+
+        paymentMethodInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                if (input.value === 'card') {
+                    cardDetails.style.display = 'block';
+                    transferDetails.style.display = 'none';
+                } else if (input.value === 'transfer') {
+                    cardDetails.style.display = 'none';
+                    transferDetails.style.display = 'block';
+                }
+            });
+        });
+
+        confirmTransferButton.addEventListener('click', () => {
+            alert('Thank you! Your payment will be verified manually.');
+        });
+    </script>
+</body>
+</html>
