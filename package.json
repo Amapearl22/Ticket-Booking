@@ -1,0 +1,24 @@
+{
+  "name": "ticket-booking",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Amapearl22/Ticket-Booking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Amapearl22/Ticket-Booking/issues"
+  },
+  "homepage": "https://github.com/Amapearl22/Ticket-Booking#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
